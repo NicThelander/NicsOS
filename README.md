@@ -1,0 +1,1 @@
+# Nic NixOS config
