@@ -5,6 +5,7 @@ pkgs:
 {
   enable = true;
   vimAlias = true;
+  
 
   # stuff that normally goes in init.vim etc
   # to take advantage of nvim lua stuff, you can do something like create a settings.lua and then add it like:
@@ -14,11 +15,57 @@ pkgs:
   configure = {
     # my nvim settings, for some reason these only work when opening things with vim and vimalias... Weird shit.
     # The FocusLost saves on focus change
+    # the defer function is to make them load asyncronously for faster builds
     customRC = ''
+
+      
+      lua << EOF
+      vim.defer_fn(function()
+        vim.cmd [[
       luafile /etc/nixos/config/nvim/lua/settings.lua
+      luafile /etc/nixos/config/nvim/lua/treesitter.lua
+      luafile /etc/nixos/config/nvim/lua/lsp.lua
+      
+      ]]
+      end, 70)
+      EOF
+
+      source /etc/nixos/config/nvim/colors/dusk.vim
       au FocusLost * :wa
+
     '';
-    packages.nix.start = with pkgs.vimPlugins; [
+    packages.myVimPackage = with pkgs.vimPlugins; {
+
+        start = [
+            # git related
+            fugitive
+
+            # visual related
+            indentLine
+
+            # prettier make things
+            nvim-treesitter
+
+            # utils
+	        nvim-tree-lua
+            nvim-web-devicons
+
+            # LSP
+            nvim-lspconfig
+            nvim-compe
+
+            # syntax related
+            vim-nix
+        ];
+
+	opt = [
+       
     ];
+	# nvim-web-devicons
+	# nvim-tree-lua
+
+        # indentLine
+
+      };
   };
 }

@@ -21,17 +21,18 @@ in
   # replicates the default behaviour.
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
+  
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  # };
+  i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "Lat2-Terminus16";
+    keyMap = "us";
+  };
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
@@ -64,10 +65,19 @@ in
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
+
+
+
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
+    }))
+  ];
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    neovim
+    neovim-nightly
     wget
     google-chrome
     zsh
@@ -79,6 +89,11 @@ in
     spotify
     discord
     unzip
+    gcc
+    steam
+    rnix-lsp
+    cabal-install
+    cabal2nix
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

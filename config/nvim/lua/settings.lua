@@ -1,12 +1,18 @@
 local opt = vim.opt
 local au = vim.au
-
 -- indentation
 opt.smartindent = true            -- will try to figure out how to indent.
 opt.autoindent = true             -- follows indentation of previous lines unless smart indent thinks otherwise.
+opt.tabstop = 4                   -- visual display of tabs
+opt.shiftwidth = 4                 -- levels of indentation
+opt.expandtab = true
 
 -- use system clipboard instead of vim specific:
 opt.clipboard = "unnamedplus"
+
+-- Undo file history (can undo after reopening)
+-- opt.undofile = true
+
 
 -- use mouse
 opt.mouse = "a"
@@ -14,6 +20,9 @@ opt.mouse = "a"
 -- code line settings
 opt.number = true                 -- line numbers.
 opt.cursorline = true             -- better visual indicator for current line.
+
+-- ui
+
 
 -- quality of life
 opt.smartcase = true              -- insensitive case search when all lowercase.
@@ -24,4 +33,8 @@ opt.incsearch = true              -- will show search results incrementally high
 opt.hidden = true                 -- allows you to work with buffers without saving them, I want to test this out.
 -- opt.shortmess = "atI"          -- this is related to stuff like swap files after crashes, will leave out for now.
 -- au.FocusLost = " * :wa"
+
+-- nvim file tree browser requirement, you can gooi custom settings in there, otherwise it assumes default.
+require'nvim-tree'.setup {
+}
 
