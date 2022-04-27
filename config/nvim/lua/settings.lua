@@ -14,6 +14,13 @@ opt.clipboard = "unnamedplus"
 -- Undo file history (can undo after reopening)
 -- opt.undofile = true
 
+require('nvim-autopairs').setup{}
+
+   
+vim.cmd [[
+    nmap <C-l> :NvimTreeToggle <CR>
+    nmap <C-p> :Telescope find_files <CR>
+]]
 
 -- use mouse
 opt.mouse = "a"
@@ -35,8 +42,4 @@ opt.incsearch = true              -- will show search results incrementally high
 opt.hidden = true                 -- allows you to work with buffers without saving them, I want to test this out.
 -- opt.shortmess = "atI"          -- this is related to stuff like swap files after crashes, will leave out for now.
 -- au.FocusLost = " * :wa"
-
--- nvim file tree browser requirement, you can gooi custom settings in there, otherwise it assumes default.
-require'nvim-tree'.setup {
-}
 

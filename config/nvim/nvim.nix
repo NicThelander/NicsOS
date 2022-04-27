@@ -13,25 +13,33 @@ pkgs:
   configure = {
     # my nvim settings, for some reason these only work when opening things with vim and vimalias... Weird shit.
     # The FocusLost saves on focus change
+    
     # the defer function is to make them load asyncronously for faster builds
+    # only have NvimTreeToggle in there for now to launch on start, the
+    # auto start feature was having issues.
     customRC = ''
+
 
       luafile /etc/nixos/config/nvim/lua/lsp.lua
       luafile /etc/nixos/config/nvim/lua/settings.lua
       luafile /etc/nixos/config/nvim/lua/treesitter.lua
       luafile /etc/nixos/config/nvim/lua/galaxyline.lua
       luafile /etc/nixos/config/nvim/lua/bufferline.lua
-
+      luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
+      luafile /etc/nixos/config/nvim/lua/telescope.lua
+      luafile /etc/nixos/config/nvim/lua/toggleterm.lua
+      
       lua << EOF
       vim.defer_fn(function()
         vim.cmd [[
-      NvimTreeToggle
+        NvimTreeToggle
       ]]
-      end, 70)
+      end, 10)
       EOF
       
       source /etc/nixos/config/nvim/colors/dusk.vim
       au FocusLost * :wa
+      
     '';
     packages.myVimPackage = with pkgs.vimPlugins; {
 
@@ -50,6 +58,8 @@ pkgs:
             # utils
 	        nvim-tree-lua
             nvim-web-devicons
+            toggleterm-nvim
+            nvim-autopairs
 
             # LSP
             nvim-lspconfig
@@ -57,6 +67,11 @@ pkgs:
 
             # syntax related
             vim-nix
+
+            # telescope
+            popup-nvim
+            plenary-nvim
+            telescope-nvim
         ];
 
 	opt = [
