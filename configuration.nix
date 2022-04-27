@@ -9,6 +9,9 @@ in
       ./hardware-configuration.nix
     ];
 
+    
+  
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -77,25 +80,43 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    # dev env
     neovim-nightly
-    wget
-    google-chrome
     zsh
-    slack
-    ghc
-    haskell-language-server
-    stack
     git
+    nixFlakes
+
+    # languages, compilers and lsp
+    ghc cabal-install cabal2nix haskell-language-server stack
+    lua
+    gcc
+    rnix-lsp
+
+    # util
+    unzip
+    wget
+  
+    # general use
+    google-chrome
+    slack
     spotify
     discord
-    unzip
-    gcc
     steam
-    rnix-lsp
-    cabal-install
-    cabal2nix
-  ];
+   
+    ];
 
+    # binary caches for IOHK
+    nix = {
+        binaryCaches          = [ "https://hydra.iohk.io" "https://iohk.cachix.org" ];
+        binaryCachePublicKeys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
+
+        package = pkgs.nixFlakes;
+        extraOptions = ''
+            extra-experimental-features = nix-command flakes
+        '';
+    };
+    # enabling nix flakes
+    
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

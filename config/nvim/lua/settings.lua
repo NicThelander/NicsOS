@@ -1,5 +1,6 @@
 local opt = vim.opt
 local au = vim.au
+local autocmd = vim.autocmd
 -- indentation
 opt.smartindent = true            -- will try to figure out how to indent.
 opt.autoindent = true             -- follows indentation of previous lines unless smart indent thinks otherwise.
@@ -16,6 +17,7 @@ opt.clipboard = "unnamedplus"
 
 -- use mouse
 opt.mouse = "a"
+
 
 -- code line settings
 opt.number = true                 -- line numbers.
