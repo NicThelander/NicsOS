@@ -7,6 +7,7 @@ in
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./cachix.nix
     ];
 
     
@@ -58,6 +59,11 @@ in
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.support32Bit = true;
+  hardware.pulseaudio.configFile = pkgs.runCommand "default.pa" {} ''
+  sed 's/module-udev-detect$/module-udev-detect tsched=0/' \
+    ${pkgs.pulseaudio}/etc/pulse/default.pa > $out
+'';
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -85,9 +91,11 @@ in
     zsh
     git
     nixFlakes
+    vscode
 
     # languages, compilers and lsp
     ghc cabal-install cabal2nix haskell-language-server stack
+      haskellPackages.ghcup haskellPackages.QuickCheck 
     lua
     gcc
     rnix-lsp
@@ -95,20 +103,28 @@ in
     # util
     unzip
     wget
-  
+    zip
+    gparted
+    cachix
+
+    # logitech wireless software
+    solaar
+
     # general use
     google-chrome
     slack
     spotify
     discord
-    steam
+
+    # sound
+    # qpaeq
    
     ];
 
     # binary caches for IOHK
     nix = {
-        binaryCaches          = [ "https://hydra.iohk.io" "https://iohk.cachix.org" ];
-        binaryCachePublicKeys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
+        binaryCaches          = ["https://public-plutonomicon.cachix.org" "https://hydra.iohk.io" "https://iohk.cachix.org" "https://cache.nixos.org/"];
+        binaryCachePublicKeys = ["3AKJMhCLn32gri1drGuaZmFrmnue+KkKrhhubQk/CWc=" "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
 
         package = pkgs.nixFlakes;
         extraOptions = ''
@@ -165,6 +181,7 @@ in
 
     fonts = with pkgs; [
       pkgs.jetbrains-mono
+      pkgs.fira-code
     ];
   
     fontconfig = {
@@ -174,6 +191,12 @@ in
     };
   };
 
+  # enable controller support in steam
+  hardware.steam-hardware.enable = true;
+  # enabled this way for proton
+  programs.steam.enable = true;
+  # uncrackle steam audio
+  services.jack.loopback.enable = true;
 
   # environment variables, not using atm but leaving here as reference.
   # environment.variables.NVIM_LUA_SETTINGS = "/etc/nixos/config/nvim/lua";
@@ -181,10 +204,12 @@ in
   # neovim setup
   programs.neovim = customNeovim pkgs;
 
+
   # Nvidea drivers
   nixpkgs.config.allowUnfree = true;
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.opengl.enable = true;
+  hardware.opengl.driSupport32Bit = true;
   hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 }
 

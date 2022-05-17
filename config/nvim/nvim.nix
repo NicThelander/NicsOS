@@ -17,29 +17,27 @@ pkgs:
     # the defer function is to make them load asyncronously for faster builds
     # only have NvimTreeToggle in there for now to launch on start, the
     # auto start feature was having issues.
-    customRC = ''
 
-
+    # old vals for customrRC:
+    # luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
+  customRC = ''
       luafile /etc/nixos/config/nvim/lua/lsp.lua
       luafile /etc/nixos/config/nvim/lua/settings.lua
       luafile /etc/nixos/config/nvim/lua/treesitter.lua
       luafile /etc/nixos/config/nvim/lua/galaxyline.lua
       luafile /etc/nixos/config/nvim/lua/bufferline.lua
-      luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
-      luafile /etc/nixos/config/nvim/lua/telescope.lua
       luafile /etc/nixos/config/nvim/lua/toggleterm.lua
-      
+
       lua << EOF
       vim.defer_fn(function()
         vim.cmd [[
-        NvimTreeToggle
-      ]]
+          luafile /etc/nixos/config/nvim/lua/telescope.lua
+        ]]
       end, 10)
       EOF
       
       source /etc/nixos/config/nvim/colors/dusk.vim
       au FocusLost * :wa
-      
     '';
     packages.myVimPackage = with pkgs.vimPlugins; {
 
@@ -56,7 +54,7 @@ pkgs:
             nvim-treesitter
 
             # utils
-	        nvim-tree-lua
+            # nvim-tree-lua
             nvim-web-devicons
             toggleterm-nvim
             nvim-autopairs
@@ -64,6 +62,7 @@ pkgs:
             # LSP
             nvim-lspconfig
             nvim-compe
+            # lsp-rooter-nvim # need to work on integrating this
 
             # syntax related
             vim-nix
@@ -77,10 +76,6 @@ pkgs:
 	opt = [
        
     ];
-	# nvim-web-devicons
-	# nvim-tree-lua
-
-        # indentLine
 
       };
   };

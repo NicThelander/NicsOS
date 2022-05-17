@@ -15,10 +15,11 @@ opt.clipboard = "unnamedplus"
 -- opt.undofile = true
 
 require('nvim-autopairs').setup{}
-
+-- require('lsp-rooter').setup {}
    
+
+-- nmap <C-l> :NvimTreeToggle <CR>
 vim.cmd [[
-    nmap <C-l> :NvimTreeToggle <CR>
     nmap <C-p> :Telescope find_files <CR>
 ]]
 

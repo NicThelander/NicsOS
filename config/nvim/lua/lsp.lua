@@ -3,7 +3,9 @@
 -- This enables all the language servers I want on my system
 -- Change these to whatever languages you use
 require'lspconfig'.rnix.setup{}
-require'lspconfig'.hls.setup{}
+require'lspconfig'.hls.setup{
+    single_file_support = true;
+}
 
 -- Enable auto-pairs
 -- require "pears".setup()
