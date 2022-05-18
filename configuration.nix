@@ -61,9 +61,9 @@ in
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.support32Bit = true;
   hardware.pulseaudio.configFile = pkgs.runCommand "default.pa" {} ''
-  sed 's/module-udev-detect$/module-udev-detect tsched=0/' \
-    ${pkgs.pulseaudio}/etc/pulse/default.pa > $out
-'';
+      sed 's/module-udev-detect$/module-udev-detect tsched=0/' \
+      ${pkgs.pulseaudio}/etc/pulse/default.pa > $out
+  '';
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -107,29 +107,44 @@ in
     gparted
     cachix
 
+    
     # logitech wireless software
     solaar
+
 
     # general use
     google-chrome
     slack
     spotify
     discord
+    libreoffice
+
 
     # sound
     # qpaeq
    
     ];
 
-    # binary caches for IOHK
+    # binary caches and enabling flakes
     nix = {
-        binaryCaches          = ["https://public-plutonomicon.cachix.org" "https://hydra.iohk.io" "https://iohk.cachix.org" "https://cache.nixos.org/"];
-        binaryCachePublicKeys = ["3AKJMhCLn32gri1drGuaZmFrmnue+KkKrhhubQk/CWc=" "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo=" ];
+      binaryCaches = [
+       # "https://cache.nixos.org/"
+       # "https://public-plutonomicon.cachix.org"
+       "https://hydra.iohk.io"
+       # "https://iohk.cachix.org"
+      ];
 
-        package = pkgs.nixFlakes;
-        extraOptions = ''
-            extra-experimental-features = nix-command flakes
-        '';
+      binaryCachePublicKeys = [
+        # "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        # "public-plutonomicon.cachix.org-1:3AKJMhCLn32gri1drGuaZmFrmnue+KkKrhhubQk/CWc="
+        "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+        # "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo="
+      ];
+
+      package = pkgs.nixFlakes;
+      extraOptions = ''
+          extra-experimental-features = nix-command flakes
+      '';
     };
     # enabling nix flakes
     

@@ -1,1 +1,2 @@
-# Nic NixOS config
+# Nic NixOS
+
