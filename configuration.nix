@@ -2,6 +2,9 @@
 
 let
   customNeovim = import ./config/nvim/nvim.nix;
+  i3setup = import ./config/i3/i3.nix;
+  vsSetup = import ./config/vscode/vscode.nix;
+  unstableTarball = fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
 in
 {
   imports =
@@ -38,16 +41,21 @@ in
     keyMap = "us";
   };
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
+ 
   # sets timezone
   time.timeZone = "Africa/Johannesburg";
+  
+
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
 
   # Enable the Plasma 5 Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
   services.xserver.desktopManager.plasma5.enable = true;
-  
+
+
+  # enabling and configuring i3-gaps
+  # services.xserver = i3setup pkgs;
 
   # Configure keymap in X11
   # services.xserver.layout = "us";
@@ -81,20 +89,28 @@ in
     (import (builtins.fetchTarball {
       url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
     }))
+    vsSetup
   ];
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  nixpkgs.config = {
+    packageOverrides = pkgs: {
+      unstable = import unstableTarball {
+        config = config.nixpkgs.config;
+      };
+    };
+  };
+
+  # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
     # dev env
     neovim-nightly
     zsh
     git
     nixFlakes
-    vscode
+    unstable.vscode-with-extensions
 
     # languages, compilers and lsp
-    ghc cabal-install cabal2nix haskell-language-server stack
+    ghc cabal-install cabal2nix unstable.haskell-language-server stack
       haskellPackages.ghcup haskellPackages.QuickCheck 
     lua
     gcc
@@ -102,10 +118,13 @@ in
 
     # util
     unzip
+    unrar
     wget
     zip
     gparted
     cachix
+    openssl
+    dialog
 
     
     # logitech wireless software
@@ -120,9 +139,15 @@ in
     libreoffice
 
 
+    # game
+    # unstable.wine
+    # unstable.wine64
+    # unstable.wine-staging
+    unstable.lutris
+    unstable.vulkan-tools
+
     # sound
     # qpaeq
-   
     ];
 
     # binary caches and enabling flakes
@@ -141,12 +166,12 @@ in
         # "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo="
       ];
 
+      # enabling nix flakes
       package = pkgs.nixFlakes;
       extraOptions = ''
           extra-experimental-features = nix-command flakes
       '';
     };
-    # enabling nix flakes
     
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -173,7 +198,7 @@ in
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.11"; # Did you read the comment?
+  system.stateVersion = "unstable"; # Did you read the comment?
 
 
 
@@ -206,6 +231,9 @@ in
     };
   };
 
+  # for vscode keyring
+  services.gnome.gnome-keyring.enable = true;
+
   # enable controller support in steam
   hardware.steam-hardware.enable = true;
   # enabled this way for proton
@@ -219,6 +247,8 @@ in
   # neovim setup
   programs.neovim = customNeovim pkgs;
 
+  # for league
+  boot.kernel.sysctl  = { "abi.vsyscall32" = 0; };
 
   # Nvidea drivers
   nixpkgs.config.allowUnfree = true;
@@ -227,4 +257,5 @@ in
   hardware.opengl.driSupport32Bit = true;
   hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 }
+
 
