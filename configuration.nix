@@ -1,10 +1,17 @@
-{ config, pkgs, ... }:
+{ lib, config, pkgs, ... }:
 
 let
   customNeovim = import ./config/nvim/nvim.nix;
   i3setup = import ./config/i3/i3.nix;
   vsSetup = import ./config/vscode/vscode.nix;
   unstableTarball = fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
+  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec -a "$0" "$@"
+  '';
 in
 {
   imports =
@@ -20,15 +27,16 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "NicsOS"; # Define your hostname.
+  networking.hostName = "NicsLaptopOS"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.eno1.useDHCP = true;
-  
+  networking.interfaces.enp7s0.useDHCP = true;
+  networking.interfaces.wlp0s20f3.useDHCP = true;
+  networking.networkmanager.enable = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -117,6 +125,9 @@ in
     rnix-lsp
 
     # util
+    pciutils
+    usbutils
+    xclip
     unzip
     unrar
     wget
@@ -125,6 +136,16 @@ in
     cachix
     openssl
     dialog
+    networkmanager
+    wirelesstools
+    lshw
+    nerdfonts
+
+
+    # graphics related
+    # nvidia-offload
+    unstable.vulkan-tools
+    autorandr
 
     
     # logitech wireless software
@@ -144,7 +165,6 @@ in
     # unstable.wine64
     # unstable.wine-staging
     unstable.lutris
-    unstable.vulkan-tools
 
     # sound
     # qpaeq
@@ -198,10 +218,12 @@ in
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "unstable"; # Did you read the comment?
+  system.stateVersion = "21.11"; # Did you read the comment?
 
 
 
+  # use latest kernel (need to see if this is scuffed)
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # NicsOS (See what I did there?):
 
@@ -234,6 +256,8 @@ in
   # for vscode keyring
   services.gnome.gnome-keyring.enable = true;
 
+  hardware.bluetooth.enable = true;
+
   # enable controller support in steam
   hardware.steam-hardware.enable = true;
   # enabled this way for proton
@@ -248,14 +272,40 @@ in
   programs.neovim = customNeovim pkgs;
 
   # for league
-  boot.kernel.sysctl  = { "abi.vsyscall32" = 0; };
+  # boot.kernel.sysctl  = { "abi.vsyscall32" = 0; };
 
   # Nvidea drivers
   nixpkgs.config.allowUnfree = true;
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.opengl.enable = true;
   hardware.opengl.driSupport32Bit = true;
-  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
+  hardware.nvidia = {
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+
+    modesetting.enable = true;
+
+    prime = {
+      
+      # sync runs only on either gpu or integrated afaik
+      sync.enable = true;
+
+      # able to offload to gpu on the run
+      # offload.enable = true;
+
+      intelBusId = "PCI:00:02:0";
+
+      nvidiaBusId = "PCI:01:00:0";
+    };
+  };
+
+  # external monitor
+#   specialisation = {
+#    external-display.configuration = {
+#      system.nixos.tags = [ "external-display" ];
+#      hardware.nvidia.prime.offload.enable = lib.mkForce false;
+#      hardware.nvidia.powerManagement.enable = lib.mkForce false;
+#    };
+#  };
 }
 
 
