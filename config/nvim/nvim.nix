@@ -1,6 +1,14 @@
 # my config for neovim
 
-pkgs:
+{ config, pkgs, ... }:
+let
+  unstable = import
+  (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz)
+  { config = config.nixpkgs.config; };
+  
+
+
+in
 {
   enable = true;
   vimAlias = true;
@@ -19,14 +27,16 @@ pkgs:
     # auto start feature was having issues.
 
     # old vals for customrRC:
-    # luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
+    # luafile /etc/nixos/config/nvim/lua/bufferline.lua
+    # luafile /etc/nixos/config/nvim/lua/galaxyline.lua
+    # source /etc/nixos/config/nvim/colors/dusk.vim
   customRC = ''
       luafile /etc/nixos/config/nvim/lua/lsp.lua
       luafile /etc/nixos/config/nvim/lua/settings.lua
       luafile /etc/nixos/config/nvim/lua/treesitter.lua
-      luafile /etc/nixos/config/nvim/lua/galaxyline.lua
-      luafile /etc/nixos/config/nvim/lua/bufferline.lua
       luafile /etc/nixos/config/nvim/lua/toggleterm.lua
+      luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
+      luafile /etc/nixos/config/nvim/lua/lualine.lua
 
       lua << EOF
       vim.defer_fn(function()
@@ -36,10 +46,10 @@ pkgs:
       end, 10)
       EOF
       
-      source /etc/nixos/config/nvim/colors/dusk.vim
+      colorscheme onehalfdark
       au FocusLost * :wa
     '';
-    packages.myVimPackage = with pkgs.vimPlugins; {
+    packages.myVimPackage = with pkgs.unstable.vimPlugins; {
 
         start = [
             # git related
@@ -47,14 +57,16 @@ pkgs:
 
             # visual related
             indentLine
-            bufferline-nvim
-            galaxyline-nvim
+            lualine-nvim
+              # bufferline-nvim
+              #galaxyline-nvim
 
             # prettier make things
             nvim-treesitter
+            onehalf
 
             # utils
-            # nvim-tree-lua
+            nvim-tree-lua
             nvim-web-devicons
             toggleterm-nvim
             nvim-autopairs
@@ -62,7 +74,9 @@ pkgs:
             # LSP
             nvim-lspconfig
             nvim-compe
-            # lsp-rooter-nvim # need to work on integrating this
+            lsp-rooter-nvim # need to work on integrating this
+
+           
 
             # syntax related
             vim-nix

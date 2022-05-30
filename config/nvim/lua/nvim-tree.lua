@@ -1,13 +1,6 @@
 -- init.lua
 
 -- empty setup using defaults: add your own options
-require'nvim-tree'.setup {
-}
-
--- OR
-
--- setup with all defaults
--- each of these are documented in `:help nvim-tree.OPTION_NAME`
 require'nvim-tree'.setup { -- BEGIN_DEFAULT_OPTS
   auto_reload_on_write = true,
   disable_netrw = false,
@@ -20,6 +13,7 @@ require'nvim-tree'.setup { -- BEGIN_DEFAULT_OPTS
   open_on_tab = false,
   sort_by = "name",
   update_cwd = false,
+  reload_on_bufenter = false,
   view = {
     width = 30,
     height = 30,
@@ -47,6 +41,7 @@ require'nvim-tree'.setup { -- BEGIN_DEFAULT_OPTS
     },
     icons = {
       webdev_colors = true,
+      git_placement = "before",
     },
   },
   hijack_directories = {
@@ -92,7 +87,7 @@ require'nvim-tree'.setup { -- BEGIN_DEFAULT_OPTS
     },
     open_file = {
       quit_on_open = false,
-      resize_window = false,
+      resize_window = true,
       window_picker = {
         enable = true,
         chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
@@ -107,6 +102,10 @@ require'nvim-tree'.setup { -- BEGIN_DEFAULT_OPTS
     cmd = "trash",
     require_confirm = true,
   },
+  live_filter = {
+    prefix = "[FILTER]: ",
+    always_show_folders = true,
+  },
   log = {
     enable = false,
     truncate = false,
@@ -119,4 +118,4 @@ require'nvim-tree'.setup { -- BEGIN_DEFAULT_OPTS
       profile = false,
     },
   },
-} -- END_DEFAULT_OPTS
+}

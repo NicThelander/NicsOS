@@ -4,8 +4,8 @@ local autocmd = vim.autocmd
 -- indentation
 opt.smartindent = true            -- will try to figure out how to indent.
 opt.autoindent = true             -- follows indentation of previous lines unless smart indent thinks otherwise.
-opt.tabstop = 4                   -- visual display of tabs
-opt.shiftwidth = 4                 -- levels of indentation
+opt.tabstop = 2                   -- visual display of tabs
+opt.shiftwidth = 2                 -- levels of indentation
 opt.expandtab = true
 
 -- use system clipboard instead of vim specific:
@@ -18,9 +18,10 @@ require('nvim-autopairs').setup{}
 -- require('lsp-rooter').setup {}
    
 
--- nmap <C-l> :NvimTreeToggle <CR>
+
 vim.cmd [[
     nmap <C-p> :Telescope find_files <CR>
+    nmap <C-l> :NvimTreeToggle <CR>
 ]]
 
 -- use mouse
@@ -32,6 +33,9 @@ opt.number = true                 -- line numbers.
 opt.cursorline = true             -- better visual indicator for current line.
 
 -- ui
+-- opt.t_Co= = 256
+
+
 
 
 -- quality of life
