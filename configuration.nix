@@ -2,8 +2,7 @@
 
 let
   customNeovim = import ./config/nvim/nvim.nix;
-  i3setup = import ./config/i3/i3.nix;
-  vsSetup = import ./config/vscode/vscode.nix;
+  # vsSetup = import ./config/vscode/vscode.nix;
   unstableTarball = fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -12,30 +11,46 @@ let
     export __VK_LAYER_NV_optimus=NVIDIA_only
     exec -a "$0" "$@"
   '';
+
+  # inherit (builtins)
+  #   concatStringsSep;
 in
-{
+  {
+    
+  system.stateVersion = "21.11";
+
+  nixpkgs.config.allowUnfree = true;
+
   imports =
-    [ # Include the results of the hardware scan.
+    [ 
       ./hardware-configuration.nix
-      ./cachix.nix
+      /etc/nixos/cachix.nix
+      # i3 setup (note I point alacrity to it's setup in here)
+      ./config/i3/i3.nix
     ];
 
-    
-  
+
+  environment.variables = {
+    EDITOR = "nvim";
+    VISUAL = "nvim";
+    TERMINAL = "alacritty";
+  };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "NicsLaptopOS"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.hostName = "NicsLaptopOS";
+
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp7s0.useDHCP = true;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
+
+
+  # always use network manager instead of manually configuring wireless,
+  # much more convenient
   networking.networkmanager.enable = true;
 
   # Configure network proxy if necessary
@@ -52,34 +67,66 @@ in
  
   # sets timezone
   time.timeZone = "Africa/Johannesburg";
+
+  
   
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  # enable x11 (already done in i3 config, will need to turn on if using something else)
+  # services.xserver.enable = true;
 
-  # Enable the Plasma 5 Desktop Environment.
-  services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
-
-
-  # enabling and configuring i3-gaps
-  # services.xserver = i3setup pkgs;
-
-  # Configure keymap in X11
-  # services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-  # Enable sound.
+
+
+  # sound section, various alternatives commented out,
+  # will probably move this into a separate folder at some point
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.support32Bit = true;
-  hardware.pulseaudio.configFile = pkgs.runCommand "default.pa" {} ''
+  
+  services.jack.loopback.enable = true;
+
+  hardware.pulseaudio = {
+    enable = true;
+    support32Bit = true;
+    configFile = pkgs.runCommand "default.pa" {} ''
       sed 's/module-udev-detect$/module-udev-detect tsched=0/' \
       ${pkgs.pulseaudio}/etc/pulse/default.pa > $out
-  '';
+    '';
+    #extraConfig = builtins.concatStringsSep "\n" [
+      # discord audio stream fix
+     # "load-module module-null-sink sink_name=Combined_Output"
+    #  "sink_properties=device.description=Combined_Output"
+    #  "load-module module-null-sink sink_name=Recorded_Sink"
+    #  "sink_properties=device.description=Recorded_Sink"
+     # "load-module module-loopback source=1 sink=Combined_Output" # source here is mic source num
+     # "load-module module-loopback source=3 sink=Combined_Output"
+      #"load-module module-loopback source=3 sink=GA104 High Definition Audio Controller Digital Stereo (HDMI)" # sink is name of headphone output
+    #];
+  };
+
+  #security.rtkit.enable = true;
+  #services.pipewire = {
+  #  enable = true;
+  #  alsa.enable = true;
+  #  alsa.support32Bit = true;
+  #  pulse.enable = true;
+  #  # If you want to use JACK applications, uncomment this
+  #  #jack.enable = true;
+  #  config.pipewire = {
+  #    "context.properties" = {
+  #      #"link.max-buffers" = 64;
+  #      "link.max-buffers" = 16; # version < 3 clients can't handle more than this
+  #      "log.level" = 2; # https://docs.pipewire.org/page_daemon.html
+  #      #"default.clock.rate" = 48000;
+  #      #"default.clock.quantum" = 1024;
+  #      #"default.clock.min-quantum" = 32;
+  #      #"default.clock.max-quantum" = 8192;
+  #    };
+  #  };
+  #};
+
+
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -87,7 +134,10 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.nic = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "adbusers"
+    ]; # Enable ‘sudo’ for the user.
   };
 
 
@@ -97,7 +147,7 @@ in
     (import (builtins.fetchTarball {
       url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
     }))
-    vsSetup
+    # vsSetup
   ];
 
   nixpkgs.config = {
@@ -108,8 +158,10 @@ in
     };
   };
 
+
   # List packages installed in system profile.
   environment.systemPackages = with pkgs; [
+
     # dev env
     neovim-nightly
     zsh
@@ -139,38 +191,76 @@ in
     networkmanager
     wirelesstools
     lshw
-    nerdfonts
+    # etcher
+    # systemd
+    # jq
+
+    # phone
+    gitRepo
+
+
+    # storage related
+    btrfs-progs
+
+    # terminal
+    ripgrep
+    unstable.alacritty
+    zsh-autosuggestions
+    unstable.foot
+
+
+    # WM
+    rofi
+    (unstable.polybar.override {
+      i3GapsSupport = true;
+      # alsaSupport = true;
+    })
 
 
     # graphics related
     # nvidia-offload
     unstable.vulkan-tools
     autorandr
-
+   
     
     # logitech wireless software
     solaar
 
-
+    
     # general use
     google-chrome
+    qutebrowser
     slack
     spotify
     discord
     libreoffice
+    # scrot # screenshot
+    # imagemagick # part of screenshot management
 
+
+    # power management (no default power management in i3)
+    tlp
+
+    # UI
+    unstable.i3status-rust
 
     # game
-    # unstable.wine
-    # unstable.wine64
-    # unstable.wine-staging
     unstable.lutris
 
     # sound
-    # qpaeq
-    ];
+    pavucontrol
+    # unstable.pipewire
+    # unstable.helvum
+  ];
+
+  programs.adb.enable = true;
+
+
 
     # binary caches and enabling flakes
+    # just left the commented out ones here because I set them up in cachix and
+    # will have to do that on new setups (might look into automating that except
+    # for confidential passwords)
     nix = {
       binaryCaches = [
        # "https://cache.nixos.org/"
@@ -192,6 +282,13 @@ in
           extra-experimental-features = nix-command flakes
       '';
     };
+
+
+
+    # power management
+    services.tlp.enable = true;
+
+
     
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -212,20 +309,16 @@ in
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "21.11"; # Did you read the comment?
 
 
 
-  # use latest kernel (need to see if this is scuffed)
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # use latest kernel (No need for newer features atm so commented out)
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # NicsOS (See what I did there?):
+
+
+
+  # terminal section
 
   # Set zsh as default
   users.defaultUserShell = pkgs.zsh;
@@ -234,16 +327,28 @@ in
   programs.zsh = {
     ohMyZsh = {
       enable = true;
-      plugins = ["git"];
+      plugins = [
+        "git"
+      ];
     };
+    syntaxHighlighting.enable = true;
+    autosuggestions.enable = true;
   };
+  
+
+
+
+
 
   fonts = {
     enableDefaultFonts = true;
 
-    fonts = with pkgs; [
-      pkgs.jetbrains-mono
-      pkgs.fira-code
+    fonts = with pkgs.unstable; [
+      jetbrains-mono
+      font-awesome
+      material-icons
+      material-design-icons
+      nerdfonts
     ];
   
     fontconfig = {
@@ -253,8 +358,13 @@ in
     };
   };
 
+
+
   # for vscode keyring
-  services.gnome.gnome-keyring.enable = true;
+  # services.gnome.gnome-keyring.enable = true;
+
+
+
 
   hardware.bluetooth.enable = true;
 
@@ -263,7 +373,6 @@ in
   # enabled this way for proton
   programs.steam.enable = true;
   # uncrackle steam audio
-  services.jack.loopback.enable = true;
 
   # environment variables, not using atm but leaving here as reference.
   # environment.variables.NVIM_LUA_SETTINGS = "/etc/nixos/config/nvim/lua";
@@ -275,25 +384,21 @@ in
   # boot.kernel.sysctl  = { "abi.vsyscall32" = 0; };
 
   # Nvidea drivers
-  nixpkgs.config.allowUnfree = true;
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.opengl.enable = true;
   hardware.opengl.driSupport32Bit = true;
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    # stable or beta are main ones to look at for nvidia kernals
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
 
     modesetting.enable = true;
 
     prime = {
-      
       # sync runs only on either gpu or integrated afaik
       sync.enable = true;
-
       # able to offload to gpu on the run
       # offload.enable = true;
-
       intelBusId = "PCI:00:02:0";
-
       nvidiaBusId = "PCI:01:00:0";
     };
   };

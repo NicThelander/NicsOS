@@ -12,6 +12,7 @@ in
 {
   enable = true;
   vimAlias = true;
+  defaultEditor = true;
   
 
   # stuff that normally goes in init.vim etc
@@ -31,11 +32,11 @@ in
     # luafile /etc/nixos/config/nvim/lua/galaxyline.lua
     # source /etc/nixos/config/nvim/colors/dusk.vim
   customRC = ''
-      luafile /etc/nixos/config/nvim/lua/lsp.lua
       luafile /etc/nixos/config/nvim/lua/settings.lua
       luafile /etc/nixos/config/nvim/lua/treesitter.lua
       luafile /etc/nixos/config/nvim/lua/toggleterm.lua
       luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
+      luafile /etc/nixos/config/nvim/lua/lsp.lua
       luafile /etc/nixos/config/nvim/lua/lualine.lua
 
       lua << EOF
@@ -51,19 +52,24 @@ in
     '';
     packages.myVimPackage = with pkgs.unstable.vimPlugins; {
 
-        start = [
+      start = [
+        # ALWAYS LOOK FOR LUA AND NVIM OPTIONS FOR SPEED
             # git related
             # fugitive
 
             # visual related
-            indentLine
+            # indentLine
+            indent-blankline-nvim
             lualine-nvim
               # bufferline-nvim
-              #galaxyline-nvim
+              # galaxyline-nvim
 
             # prettier make things
             nvim-treesitter
             onehalf
+
+            # file mangement
+            # vim-automkdir
 
             # utils
             nvim-tree-lua
@@ -74,9 +80,7 @@ in
             # LSP
             nvim-lspconfig
             nvim-compe
-            lsp-rooter-nvim # need to work on integrating this
-
-           
+            # lsp-rooter-nvim # need to work on integrating this
 
             # syntax related
             vim-nix

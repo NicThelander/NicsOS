@@ -1,5 +1,5 @@
 local opt = vim.opt
-local au = vim.au
+-- local au = vim.au
 local autocmd = vim.autocmd
 -- indentation
 opt.smartindent = true            -- will try to figure out how to indent.
@@ -15,6 +15,10 @@ opt.clipboard = "unnamedplus"
 -- opt.undofile = true
 
 require('nvim-autopairs').setup{}
+require("indent_blankline").setup {
+    -- show_current_context = true,
+    -- show_current_context_start = true,
+}
 -- require('lsp-rooter').setup {}
    
 
