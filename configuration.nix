@@ -2,7 +2,6 @@
 
 let
   customNeovim = import ./config/nvim/nvim.nix;
-  # vsSetup = import ./config/vscode/vscode.nix;
   unstableTarball = fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -16,29 +15,38 @@ let
   #   concatStringsSep;
 in
   {
-    
-  system.stateVersion = "21.11";
+  system.stateVersion = "23.05";
 
   nixpkgs.config.allowUnfree = true;
 
-  imports =
-    [ 
+  imports = [ 
       ./hardware-configuration.nix
-      /etc/nixos/cachix.nix
-      # i3 setup (note I point alacrity to it's setup in here)
-      ./config/i3/i3.nix
+      # /etc/nixos/cachix.nix
     ];
+
+  
+  # UI section
+  programs.hyprland = {
+    enable = true;
+    enableNvidiaPatches = true;
+  };
+  environment.sessionVariables.NIXOS_OZONE_WL = "1"; 
+
+
+  # END OF UI SECTION
 
 
   environment.variables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
-    TERMINAL = "alacritty";
+    TERMINAL = "wezterm";
   };
+
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
 
   networking.hostName = "NicsLaptopOS";
 
@@ -57,6 +65,7 @@ in
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
+
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -64,20 +73,13 @@ in
     keyMap = "us";
   };
 
- 
+
   # sets timezone
   time.timeZone = "Africa/Johannesburg";
-
-  
-  
-
-  # enable x11 (already done in i3 config, will need to turn on if using something else)
-  # services.xserver.enable = true;
 
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
-
 
 
   # sound section, various alternatives commented out,
@@ -112,7 +114,7 @@ in
   #  alsa.support32Bit = true;
   #  pulse.enable = true;
   #  # If you want to use JACK applications, uncomment this
-  #  #jack.enable = true;
+  #  # jack.enable = true;
   #  config.pipewire = {
   #    "context.properties" = {
   #      #"link.max-buffers" = 64;
@@ -127,7 +129,6 @@ in
   #};
 
 
-
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
@@ -136,11 +137,9 @@ in
     isNormalUser = true;
     extraGroups = [
       "wheel"
-      "adbusers"
+      # "adbusers"
     ]; # Enable ‘sudo’ for the user.
   };
-
-
 
 
   nixpkgs.overlays = [
@@ -149,6 +148,7 @@ in
     }))
     # vsSetup
   ];
+
 
   nixpkgs.config = {
     packageOverrides = pkgs: {
@@ -167,11 +167,11 @@ in
     zsh
     git
     nixFlakes
-    unstable.vscode-with-extensions
+    # unstable.vscode-with-extensions
 
     # languages, compilers and lsp
-    ghc cabal-install cabal2nix unstable.haskell-language-server stack
-      haskellPackages.ghcup haskellPackages.QuickCheck 
+    ghc cabal-install cabal2nix # unstable.haskell-language-server stack
+      # haskellPackages.ghcup haskellPackages.QuickCheck 
     lua
     gcc
     rnix-lsp
@@ -198,7 +198,6 @@ in
     # phone
     gitRepo
 
-
     # storage related
     btrfs-progs
 
@@ -207,25 +206,23 @@ in
     unstable.alacritty
     zsh-autosuggestions
     unstable.foot
-
+    wezterm
 
     # WM
-    rofi
-    (unstable.polybar.override {
-      i3GapsSupport = true;
+    # rofi
+    # (unstable.polybar.override {
+      # i3GapsSupport = true;
       # alsaSupport = true;
-    })
-
+    # })
+    tofi
 
     # graphics related
     # nvidia-offload
     unstable.vulkan-tools
-    autorandr
-   
+    # autorandr
     
     # logitech wireless software
     solaar
-
     
     # general use
     google-chrome
@@ -237,12 +234,10 @@ in
     # scrot # screenshot
     # imagemagick # part of screenshot management
 
-
     # power management (no default power management in i3)
     tlp
 
     # UI
-    unstable.i3status-rust
 
     # game
     unstable.lutris
@@ -251,42 +246,68 @@ in
     pavucontrol
     # unstable.pipewire
     # unstable.helvum
+    
+    wofi
+    neofetch
+    # socat
+    # jq
+    # acpi
+    # inotify-tools
+    # bluez
+    # brightnessctl
+    # playerctl
+    # networkmanager
+    # imagemagick
+    # gjs
+    # gnome3.gnome-bluetooth
+    # upower
+    # gtk3
+    # wl-clipboard
+    # blueberry
+    # polkit_gnome
+    # eww-wayland
+    # wl-gammactl
+    # hyprpicker
+    # swappy
+    # wlsunset
   ];
 
-  programs.adb.enable = true;
 
 
 
-    # binary caches and enabling flakes
-    # just left the commented out ones here because I set them up in cachix and
-    # will have to do that on new setups (might look into automating that except
-    # for confidential passwords)
-    nix = {
-      binaryCaches = [
-       # "https://cache.nixos.org/"
-       # "https://public-plutonomicon.cachix.org"
-       "https://hydra.iohk.io"
-       # "https://iohk.cachix.org"
-      ];
-
-      binaryCachePublicKeys = [
-        # "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+  # binary caches and enabling flakes
+  # just left the commented out ones here because I set them up in cachix and
+  # will have to do that on new setups (might look into automating that except
+  # for confidential passwords)
+  nix = {
+    settings = {
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         # "public-plutonomicon.cachix.org-1:3AKJMhCLn32gri1drGuaZmFrmnue+KkKrhhubQk/CWc="
         "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
         # "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo="
       ];
 
-      # enabling nix flakes
-      package = pkgs.nixFlakes;
-      extraOptions = ''
-          extra-experimental-features = nix-command flakes
-      '';
+
+      substituters = [
+         "https://cache.nixos.org/"
+         # "https://public-plutonomicon.cachix.org"
+         "https://hydra.iohk.io"
+         # "https://iohk.cachix.org"
+      ];
     };
 
+         # enabling nix flakes
+    package = pkgs.nixFlakes;
+    extraOptions = ''
+        extra-experimental-features = nix-command flakes
+    '';
+  };
 
 
-    # power management
-    services.tlp.enable = true;
+
+  # power management
+  services.tlp.enable = true;
 
 
     
@@ -310,21 +331,13 @@ in
   # networking.firewall.enable = false;
 
 
-
-
   # use latest kernel (No need for newer features atm so commented out)
   # boot.kernelPackages = pkgs.linuxPackages_latest;
 
-
-
-
-  # terminal section
-
-  # Set zsh as default
-  users.defaultUserShell = pkgs.zsh;
-  
-  # ohmyzsh config
+ 
+  # zsh config
   programs.zsh = {
+    enable = true;
     ohMyZsh = {
       enable = true;
       plugins = [
@@ -334,36 +347,29 @@ in
     syntaxHighlighting.enable = true;
     autosuggestions.enable = true;
   };
-  
 
 
-
+  # Set zsh as default
+  users.defaultUserShell = pkgs.zsh;
 
 
   fonts = {
-    enableDefaultFonts = true;
-
-    fonts = with pkgs.unstable; [
+    enableDefaultPackages = true;
+    
+    packages = with pkgs.unstable; [
       jetbrains-mono
       font-awesome
       material-icons
       material-design-icons
       nerdfonts
     ];
-  
+
     fontconfig = {
       defaultFonts = {
         monospace = ["jetbrains-mono"];	
       };
     };
   };
-
-
-
-  # for vscode keyring
-  # services.gnome.gnome-keyring.enable = true;
-
-
 
 
   hardware.bluetooth.enable = true;

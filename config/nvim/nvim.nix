@@ -31,13 +31,13 @@ in
     # luafile /etc/nixos/config/nvim/lua/bufferline.lua
     # luafile /etc/nixos/config/nvim/lua/galaxyline.lua
     # source /etc/nixos/config/nvim/colors/dusk.vim
+    # luafile /etc/nixos/config/nvim/lua/treesitter.lua
   customRC = ''
       luafile /etc/nixos/config/nvim/lua/settings.lua
-      luafile /etc/nixos/config/nvim/lua/treesitter.lua
       luafile /etc/nixos/config/nvim/lua/toggleterm.lua
-      luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
       luafile /etc/nixos/config/nvim/lua/lsp.lua
       luafile /etc/nixos/config/nvim/lua/lualine.lua
+      luafile /etc/nixos/config/nvim/lua/nvim-tree.lua
 
       lua << EOF
       vim.defer_fn(function()
