@@ -24,7 +24,6 @@ in
 
   imports = [ 
       # /etc/nixos/hardware-configuration.nix
-
       ./hardware-configuration.nix
       # /etc/nixos/cachix.nix
     ];
@@ -34,41 +33,36 @@ in
   programs.hyprland = {
     enable = true;
     enableNvidiaPatches = true;
-  };
-  environment.sessionVariables.NIXOS_OZONE_WL = "1"; 
-
-
-  # END OF UI SECTION
-
-
-  environment.variables = {
-    EDITOR = "nvim";
-    VISUAL = "nvim";
-    TERMINAL = "alacritty";
+    xwayland = {
+      enable = true;
+    };
   };
 
+  # end of UI section
 
+  environment = {
+    variables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+      TERMINAL = "alacritty";
+    };
+    sessionVariables = {
+      NIXOS_OZONE_WL = "1";
+    };
+  };
+  
   # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
 
 
-  networking.hostName = "NicsLaptopOS";
-
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-
-
-  # always use network manager instead of manually configuring wireless,
-  # much more convenient
-  networking.networkmanager.enable = true;
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  networking = {
+    networkmanager.enable = true;
+    useDHCP = false;
+    hostName = "NicsLaptopOS";
+  };
 
 
   # Select internationalisation properties.
@@ -151,7 +145,6 @@ in
     (import (builtins.fetchTarball {
       url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
     }))
-    # vsSetup
   ];
 
 
@@ -257,11 +250,9 @@ in
     
     wofi
     neofetch
-    # qt5.full
-    stable.qt6.full
-    stable.qt6.qtwayland
-    # libsForQt5.qwt
-    libva
+    # stable.qt6.full
+    # stable.qt6.qtwayland
+    # libva
     # protobuf
     # protobufc # might need?
 
@@ -274,62 +265,48 @@ in
 
     ntfs3g
 
-    # socat
-    # jq
-    # acpi
+
+    hyprpaper
+    xwayland
+    gtk4
+    gtk3
+    bluez
+    wl-clipboard
+    swappy
+
+    ### later setup things 
+    # acpi # batt status too
     # inotify-tools
-    # bluez
     # brightnessctl
     # playerctl
-    # networkmanager
+    
+    ### maybe setup things
     # imagemagick
-    # gjs
-    # gnome3.gnome-bluetooth
-    # upower
-    # gtk3
-    # wl-clipboard
-    # blueberry
-    # polkit_gnome
     # eww-wayland
     # wl-gammactl
-    # hyprpicker
-    # swappy
     # wlsunset
   ];
 
 
 
 
-  # binary caches and enabling flakes
-  # just left the commented out ones here because I set them up in cachix and
-  # will have to do that on new setups (might look into automating that except
-  # for confidential passwords)
   nix = {
     settings = {
+      # TODO: cachix setup (inconvenient for first time installs though)
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        # "public-plutonomicon.cachix.org-1:3AKJMhCLn32gri1drGuaZmFrmnue+KkKrhhubQk/CWc="
-        # "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-        # "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo="
       ];
-
-
       substituters = [
          "https://cache.nixos.org/"
-         # "https://public-plutonomicon.cachix.org"
-         # "https://hydra.iohk.io"
-         # "https://iohk.cachix.org"
-      ];
+       ];
     };
 
-         # enabling nix flakes
+    # enabling nix flakes
     package = pkgs.nixFlakes;
     extraOptions = ''
         extra-experimental-features = nix-command flakes
     '';
   };
-
-
 
   # power management
   services.tlp.enable = true;
