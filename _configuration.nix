@@ -3,7 +3,6 @@
 let
   customNeovim = import ./config/nvim/nvim.nix;
   unstableTarball = fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
-  stable = import <nixos-23.05> { config = {allowUnfree = true; }; };
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
     export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
@@ -17,15 +16,14 @@ let
 in
   {
   system.stateVersion = "23.05";
-  # nix.nixPath = [ "nixos-config=$HOME/Documents/NicsOS/configuration.nix" ];
-  system.autoUpgrade.channel = "https://nixos.org/channels/nixos-unstable";
+  nix.nixPath = [ "nixos-config=$HOME/Documents/NicsOS/configuration.nix" ];
 
   nixpkgs.config.allowUnfree = true;
 
   imports = [ 
-      # /etc/nixos/hardware-configuration.nix
+      /etc/nixos/hardware-configuration.nix
 
-      ./hardware-configuration.nix
+      # ./hardware-configuration.nix
       # /etc/nixos/cachix.nix
     ];
 
@@ -44,7 +42,7 @@ in
   environment.variables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
-    TERMINAL = "alacritty";
+    TERMINAL = "wezterm";
   };
 
 
@@ -196,11 +194,10 @@ in
     networkmanager
     wirelesstools
     lshw
-    zenith-nvidia
     # etcher
     # systemd
     # jq
-  
+
     # phone
     gitRepo
 
@@ -213,10 +210,9 @@ in
     zsh-autosuggestions
     unstable.foot
     wezterm
-    htop
 
     # WM
-    rofi-wayland
+    # rofi
     # (unstable.polybar.override {
       # i3GapsSupport = true;
       # alsaSupport = true;
@@ -240,7 +236,6 @@ in
     libreoffice
     # scrot # screenshot
     # imagemagick # part of screenshot management
-    vlc
 
     # power management (no default power management in i3)
     tlp
@@ -257,23 +252,6 @@ in
     
     wofi
     neofetch
-    # qt5.full
-    stable.qt6.full
-    stable.qt6.qtwayland
-    # libsForQt5.qwt
-    libva
-    # protobuf
-    # protobufc # might need?
-
-    
-    gamemode
-    mangohud
-    goverlay
-    protonup-qt
-
-
-    ntfs3g
-
     # socat
     # jq
     # acpi
@@ -309,7 +287,7 @@ in
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         # "public-plutonomicon.cachix.org-1:3AKJMhCLn32gri1drGuaZmFrmnue+KkKrhhubQk/CWc="
-        # "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+        "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
         # "iohk.cachix.org-1:DpRUyj7h7V830dp/i6Nti+NEO2/nhblbov/8MW7Rqoo="
       ];
 
@@ -317,7 +295,7 @@ in
       substituters = [
          "https://cache.nixos.org/"
          # "https://public-plutonomicon.cachix.org"
-         # "https://hydra.iohk.io"
+         "https://hydra.iohk.io"
          # "https://iohk.cachix.org"
       ];
     };
