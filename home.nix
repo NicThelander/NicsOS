@@ -20,7 +20,7 @@
   home.packages = with pkgs; [
     neovim
     zig
-    neofetch
+    wezterm
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
@@ -65,7 +65,9 @@
   #
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
-    # EDITOR = "emacs";
+    EDITOR = "nvim";
+    VISIAL = "nvim";
+    TERMINAL = "alacritty";
   };
 
   # Let Home Manager install and manage itself.
